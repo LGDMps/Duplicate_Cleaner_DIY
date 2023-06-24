@@ -65,10 +65,10 @@ def complement_images(folder_a, folder_b, destination_folder):
     image_files_b.sort(key=os.path.getsize)
 
     iter_a = iter(image_files_a)
-
     while True:
         try:
             file_a = next(iter_a)
+            size_a = os.path.getsize(file_a)
         except StopIteration:
             break
 
@@ -76,11 +76,9 @@ def complement_images(folder_a, folder_b, destination_folder):
         while True:
             try:
                 file_b = next(iter_b)
+                size_b = os.path.getsize(file_b)
             except StopIteration:
                 break
-
-            size_a = os.path.getsize(file_a)
-            size_b = os.path.getsize(file_b)
 
             if size_a > size_b:
                 continue
@@ -129,6 +127,45 @@ def remove_duplicate_images(folder, recycle_folder):
                 image_files.remove(file_a)
                 print(f'Removed {file_a} and kept {file_b}')
                 file_a = file_b
+
+def recall_duplicate_images(folder_a,folder_b, recycle_folder):
+    '''
+    从folder_b中去除(召回, recall)在folder_a中已经存在的图片
+
+    被召回的图片放到recycle_folder中
+    '''
+    image_files_a = get_image_files(folder_a)
+    image_files_b = get_image_files(folder_b)
+    
+    image_files_a.sort(key=os.path.getsize)
+    image_files_b.sort(key=os.path.getsize)
+
+    iter_a = iter(image_files_a)
+    while True:
+        try:
+            file_a = next(iter_a)
+            size_a = os.path.getsize(file_a)
+        except StopIteration:
+            break
+
+        iter_b = iter(image_files_b)
+        while True:
+            try:
+                file_b = next(iter_b)
+                size_b = os.path.getsize(file_b)
+            except StopIteration:
+                break
+
+            if size_a > size_b:
+                continue
+
+            if size_a < size_b:
+                break
+
+            if compare_images(file_a, file_b):
+                move_file(file_b, recycle_folder)
+                image_files_b.remove(file_b)
+                continue
 
 
 
@@ -200,7 +237,7 @@ def move_file(file, destination_folder) -> str:
     destination_file = os.path.join(destination_folder, file_name)
     try:
         shutil.move(file, destination_file)
-        print(f"Successfully moved {file} to {destination_folder}")
+        print(f"Moved {file} to {destination_folder}")
     except shutil.Error:
         # 处理目标位置已存在同名文件的情况
         print("移动操作被取消，目标位置已存在同名文件")
@@ -298,28 +335,3 @@ def compare_chinese_characters(str1, str2) -> bool:
     count2 = len(re.findall(chinese_pattern, str2))  # 获取str2中汉字字符的数量
 
     return count1 > count2
-
-
-if __name__ == '__main__':
-    
-    pass
-
-    # 示例用法
-    # folder_a = r"E:\中转站\images"
-    # folder_b = r"E:\中转站\fullMI"
-    # transfer_folder = r"E:\中转站\transfer_folder"
-
-    # exchange_better_name(folder_a, folder_b, transfer_folder)
-
-
-
-    # FOLDER_A = r"E:\中转站\images"
-    # FOLDER_B = r"E:\中转站\fullMI"
-    # DESTINATION_FOLDER = r"E:\中转站\destination_folder"
-    # complement_images(FOLDER_A, FOLDER_B, DESTINATION_FOLDER)
-
-
-    # FOLDER = r"E:\中转站\fullMI"
-    # RECYCLE_FOLDER = r"E:\中转站\recycle_folder"
-
-    # remove_duplicate_images(FOLDER, RECYCLE_FOLDER)
